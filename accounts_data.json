@@ -1,0 +1,38 @@
+{
+  "accounts": [
+    {
+      "account_number": "123",
+      "owner": "Rob",
+      "initial_balance": 1000,
+      "interest_rate": 2,
+      "opening_date": "2024-01-01"
+    },
+    {
+      "account_number": "456",
+      "owner": "Lea",
+      "initial_balance": 2000,
+      "interest_rate": 1,
+      "opening_date": "2024-01-01"
+    }
+  ],
+  "operations": [
+    {
+      "type": "withdraw",
+      "account": "123",
+      "amount": 500,
+      "date": "2025-01-01"
+    },
+    {
+      "type": "withdraw",
+      "account": "123",
+      "amount": 500,
+      "date": "2026-01-01"
+    },
+    {
+      "type": "withdraw",
+      "account": "456",
+      "amount": 130,
+      "date": "2024-12-31"
+    }
+  ]
+}

@@ -29,9 +29,11 @@ class Account:
     ) -> None:
         self.account_number = str(account_number)
         self.owner = owner
+        self.initial_balance = float(initial_balance)
         self.balance = float(initial_balance)
         self.interest_rate = float(interest_rate) / 100
         opened = datetime.strptime(opening_date, DATE_FMT) if opening_date else datetime.now()
+        self.opening_date = opened
         self.transactions: List[Transaction] = [
             Transaction("Initial balance", float(initial_balance), opened, 0)
         ]
@@ -156,8 +158,10 @@ class Account:
 
 
 class AccountBook:
-    def __init__(self) -> None:
+    def __init__(self, data_path: Optional[Path] = None) -> None:
         self.accounts: Dict[str, Account] = {}
+        self.data_path = data_path
+        self.operations_log: List[dict] = []
 
     def add_account(self, new_account: Account) -> None:
         self.accounts[new_account.account_number] = new_account
@@ -168,28 +172,84 @@ class AccountBook:
             raise KeyError(f"Account {account_number} does not exist.")
         return self.accounts[key]
 
-    def apply_operation(self, operation: dict) -> str:
+    @staticmethod
+    def _normalize_operation(operation: dict) -> dict:
         op_type = operation["type"].lower()
-        amount = float(operation["amount"])
-        date = operation.get("date")
+        normalized = {
+            "type": op_type,
+            "amount": float(operation["amount"]),
+        }
+
+        if operation.get("date"):
+            normalized["date"] = operation["date"]
+
+        if op_type in {"deposit", "withdraw"}:
+            normalized["account"] = str(operation["account"])
+        elif op_type == "transfer":
+            normalized["from_account"] = str(operation["from_account"])
+            normalized["to_account"] = str(operation["to_account"])
+        else:
+            raise ValueError(f"Unsupported operation type: {op_type}")
+
+        return normalized
+
+    def _serialize_accounts(self) -> List[dict]:
+        return [
+            {
+                "account_number": acc.account_number,
+                "owner": acc.owner,
+                "initial_balance": round(acc.initial_balance, 2),
+                "interest_rate": round(acc.interest_rate * 100, 6),
+                "opening_date": acc.opening_date.strftime(DATE_FMT),
+            }
+            for acc in self.accounts.values()
+        ]
+
+    def save_json(self, data_path: Optional[Path] = None) -> None:
+        target = data_path or self.data_path
+        if target is None:
+            raise ValueError("No data path configured for persistence.")
+
+        payload = {
+            "accounts": self._serialize_accounts(),
+            "operations": self.operations_log,
+        }
+        target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def apply_operation(self, operation: dict, persist: bool = True) -> str:
+        normalized = self._normalize_operation(operation)
+        op_type = normalized["type"]
+        amount = normalized["amount"]
+        date = normalized.get("date")
 
         if op_type == "deposit":
-            source_account = self.get_account(operation["account"])
-            return source_account.deposit(amount, date)
-        if op_type == "withdraw":
-            source_account = self.get_account(operation["account"])
-            return source_account.withdraw(amount, date)
-        if op_type == "transfer":
-            source = self.get_account(operation["from_account"])
-            target = self.get_account(operation["to_account"])
-            return source.transfer(target, amount, date)
+            source_account = self.get_account(normalized["account"])
+            result = source_account.deposit(amount, date)
+        elif op_type == "withdraw":
+            source_account = self.get_account(normalized["account"])
+            result = source_account.withdraw(amount, date)
+        elif op_type == "transfer":
+            source = self.get_account(normalized["from_account"])
+            target = self.get_account(normalized["to_account"])
+            result = source.transfer(target, amount, date)
+        else:
+            raise ValueError(f"Unsupported operation type: {op_type}")
 
-        raise ValueError(f"Unsupported operation type: {op_type}")
+        if persist:
+            self.operations_log.append(normalized)
+            if self.data_path is not None:
+                self.save_json()
+
+        return result
 
     @classmethod
-    def from_json(cls, data_path: Path) -> "AccountBook":
-        payload = json.loads(data_path.read_text(encoding="utf-8"))
-        book = cls()
+    def from_payload(
+        cls,
+        payload: dict,
+        verbose: bool = True,
+        data_path: Optional[Path] = None,
+    ) -> "AccountBook":
+        book = cls(data_path=data_path)
 
         for item in payload.get("accounts", []):
             book.add_account(
@@ -202,11 +262,19 @@ class AccountBook:
                 )
             )
 
-        for operation in payload.get("operations", []):
-            result = book.apply_operation(operation)
-            print(result)
+        book.operations_log = [cls._normalize_operation(op) for op in payload.get("operations", [])]
+
+        for operation in book.operations_log:
+            result = book.apply_operation(operation, persist=False)
+            if verbose:
+                print(result)
 
         return book
+
+    @classmethod
+    def from_json(cls, data_path: Path, verbose: bool = True) -> "AccountBook":
+        payload = json.loads(data_path.read_text(encoding="utf-8"))
+        return cls.from_payload(payload, verbose=verbose, data_path=data_path)
 
 
 if __name__ == "__main__":

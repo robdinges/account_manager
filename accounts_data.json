@@ -3,36 +3,120 @@
     {
       "account_number": "123",
       "owner": "Rob",
-      "initial_balance": 1000,
-      "interest_rate": 2,
+      "initial_balance": 1000.0,
+      "interest_rate": 2.0,
       "opening_date": "2024-01-01"
     },
     {
       "account_number": "456",
       "owner": "Lea",
-      "initial_balance": 2000,
-      "interest_rate": 1,
+      "initial_balance": 2000.0,
+      "interest_rate": 1.0,
       "opening_date": "2024-01-01"
     }
   ],
   "operations": [
     {
       "type": "withdraw",
-      "account": "123",
-      "amount": 500,
-      "date": "2025-01-01"
+      "amount": 500.0,
+      "date": "2025-01-01",
+      "account": "123"
     },
     {
       "type": "withdraw",
-      "account": "123",
-      "amount": 500,
-      "date": "2026-01-01"
+      "amount": 500.0,
+      "date": "2026-01-01",
+      "account": "123"
     },
     {
       "type": "withdraw",
-      "account": "456",
-      "amount": 130,
-      "date": "2024-12-31"
+      "amount": 130.0,
+      "date": "2024-12-31",
+      "account": "456"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
+    },
+    {
+      "type": "transfer",
+      "amount": 101.0,
+      "date": "2026-03-11",
+      "from_account": "456",
+      "to_account": "123"
     }
   ]
 }
